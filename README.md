@@ -1,4 +1,3 @@
-```markdown
 # 🐳 TechRetail — Docker Swarm on AWS EC2
 
 > Plataforma de comercio electrónico peruana modernizada con arquitectura de
