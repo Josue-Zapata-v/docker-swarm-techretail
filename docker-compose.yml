@@ -1,0 +1,91 @@
+version: "3.8"
+
+services:
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    configs:
+      - source: nginx_config
+        target: /etc/nginx/nginx.conf
+    networks:
+      - techretail_net
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  backend:
+    image: josuz/techretail-backend:latest
+    networks:
+      - techretail_net
+    secrets:
+      - db_password
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  database:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_password
+      MYSQL_DATABASE: techretail_db
+    networks:
+      - techretail_net
+    volumes:
+      - db_data:/var/lib/mysql
+    secrets:
+      - db_password
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  cache:
+    image: redis:7-alpine
+    networks:
+      - techretail_net
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  visualizer:
+    image: dockersamples/visualizer
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - techretail_net
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+networks:
+  techretail_net:
+    driver: overlay
+
+volumes:
+  db_data:
+
+secrets:
+  db_password:
+    external: true
+
+configs:
+  nginx_config:
+    file: ./nginx.conf
