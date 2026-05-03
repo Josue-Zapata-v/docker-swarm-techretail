@@ -1,7 +1,3 @@
-Aquí tienes el README.md profesional. Cópialo y pégalo en VSCode, luego sube el archivo al repositorio reemplazando el anterior.
-
----
-
 ```markdown
 # 🐳 TechRetail — Docker Swarm on AWS EC2
 
